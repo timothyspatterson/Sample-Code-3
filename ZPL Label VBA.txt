@@ -1,0 +1,207 @@
+Public sLabelData As String
+Public sFSGBLabelFilePath As String
+Sub TestLabels()
+    Call GetSFGBBLabelDataByLineRange(4, 10)
+End Sub
+
+Sub GetSFGBBLabelData()
+    Dim BCData As Variant, arrLabelData() As Variant
+    Dim iLINE As Integer, iQTY As Integer, iSERIES As Integer, iLastRow As Integer, i As Integer, j As Integer, iLineNumber As Integer, iQTYof As Integer
+    Dim dWIDTH As Double, dHEIGHT As Double, dRADIUS As Double, dLEG As Double
+    Dim sSHAPE As String, sHANDING As String, sCOLOR As String, sLITES As String, sTINT As String, sTEMPERED As String, sARGON As String, sCOMMENTS As String, sLabels As String
+    Dim fso As Object
+    Dim Fileout As Object
+    
+    'Clear StringBuilder
+    sLabelData = ""
+    
+    'Get number of line items
+    iLastRow = Worksheets("FIXED SHAPED GLASS BLOWBACK").Columns("IT").Find("*", SearchDirection:=xlPrevious, SearchOrder:=xlByRows, LookIn:=xlValues).Row
+    
+    'Populate array with sheet data
+    arrLabelData = Worksheets("FIXED SHAPED GLASS BLOWBACK").Range("IT4:JL" & iLastRow).Value
+    
+    For i = 1 To UBound(arrLabelData)
+        'Set current Line Number
+        iLineNumber = arrLabelData(i, 2)
+        'Set LBOUND QTY number
+        iQTYof = 1
+        For j = 1 To arrLabelData(i, 3)
+            'Create ZPL code from data
+            sLabelData = sLabelData & vbNewLine & CreateSFGBLabel(arrLabelData(i, 1), iLineNumber, iQTYof & " of " & arrLabelData(i, 3), arrLabelData(i, 4), arrLabelData(i, 6), arrLabelData(i, 8), arrLabelData(i, 10), arrLabelData(i, 11), arrLabelData(i, 12), arrLabelData(i, 13), arrLabelData(i, 14), arrLabelData(i, 15), arrLabelData(i, 16), arrLabelData(i, 17), arrLabelData(i, 18), arrLabelData(i, 19))
+            If (arrLabelData(i, 3) > 1) Then
+                'If the QTY is > 1 then itterate the Line Number
+                iLineNumber = iLineNumber + 1
+                'If the QTY is > 1 then update the QTY LBOUND
+                iQTYof = iQTYof + 1
+            End If
+            
+        Next j
+    Next i
+    
+    'Create/Over Write the Label File
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    sFSGBLabelFilePath = "\\BFS\Departments\HOUSTON\Scheduling\Label Files\SFGBLabels - " & DatePart("m", Now()) & " " & DatePart("d", Now()) & " " & DatePart("yyyy", Now()) & ".txt"
+    Set Fileout = fso.CreateTextFile("\\BFS\Departments\HOUSTON\Scheduling\Label Files\SFGBLabels - " & DatePart("m", Now()) & " " & DatePart("d", Now()) & " " & DatePart("yyyy", Now()) & ".txt", True, True)
+    Fileout.Write sLabelData
+    Fileout.Close
+    
+    'Print the label file
+
+End Sub
+Sub GetSFGBBLabelDataByLineRange(StartingRow As Integer, EndingRow As Integer)
+    Dim BCData As Variant, arrLabelData() As Variant
+    Dim iLINE As Integer, iQTY As Integer, iSERIES As Integer, iLastRow As Integer, i As Integer, j As Integer, iLineNumber As Integer, iQTYof As Integer, iStartingLine As Integer, iEndingLine As Integer
+    Dim dWIDTH As Double, dHEIGHT As Double, dRADIUS As Double, dLEG As Double
+    Dim sSHAPE As String, sHANDING As String, sCOLOR As String, sLITES As String, sTINT As String, sTEMPERED As String, sARGON As String, sCOMMENTS As String, sLabels As String
+    Dim fso As Object
+    Dim Fileout As Object
+    Dim cell As Range
+    'Get number of line items
+    iLastRow = Worksheets("FIXED SHAPED GLASS BLOWBACK").Columns("IT").Find("*", SearchDirection:=xlPrevious, SearchOrder:=xlByRows, LookIn:=xlValues).Row
+    
+    Set cell = Worksheets("FIXED SHAPED GLASS BLOWBACK").Range("IU4:IU" & iLastRow).Find(CStr(StartingRow))
+    iStartingLine = cell.Row
+    
+    Set cell = Worksheets("FIXED SHAPED GLASS BLOWBACK").Range("IU4:IU" & iLastRow).Find(CStr(EndingRow))
+    iEndingLine = cell.Row
+    
+    If (iStartingLine < 4) Then
+        iStartingLine = 4
+    End If
+    If (iStartingLine > iLastRow) Then
+        iStartingLine = iLastRow - 1
+    End If
+    If (iEndingLine < iStartingLine) Then
+        iEndingLine = iStartingLine + 1
+    End If
+    If (iEndingLine > iLastRow) Then
+        iEndingLine = iLastRow
+    End If
+    
+    
+    'Clear StringBuilder
+    sLabelData = ""
+
+    'Populate array with sheet data
+    arrLabelData = Worksheets("FIXED SHAPED GLASS BLOWBACK").Range("IT" & iStartingLine & ":JL" & iEndingLine).Value
+    
+    For i = 1 To UBound(arrLabelData)
+        'Set current Line Number
+        iLineNumber = arrLabelData(i, 2)
+        'Set LBOUND QTY number
+        iQTYof = 1
+        For j = 1 To arrLabelData(i, 3)
+            'Create ZPL code from data
+            sLabelData = sLabelData & vbNewLine & CreateSFGBLabel(arrLabelData(i, 1), iLineNumber, iQTYof & " of " & arrLabelData(i, 3), arrLabelData(i, 4), arrLabelData(i, 6), arrLabelData(i, 8), arrLabelData(i, 10), arrLabelData(i, 11), arrLabelData(i, 12), arrLabelData(i, 13), arrLabelData(i, 14), arrLabelData(i, 15), arrLabelData(i, 16), arrLabelData(i, 17), arrLabelData(i, 18), arrLabelData(i, 19))
+            If (arrLabelData(i, 3) > 1) Then
+                'If the QTY is > 1 then itterate the Line Number
+                iLineNumber = iLineNumber + 1
+                'If the QTY is > 1 then update the QTY LBOUND
+                iQTYof = iQTYof + 1
+            End If
+            
+        Next j
+    Next i
+    
+    'Create/Over Write the Label File
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    sFSGBLabelFilePath = "\\BFS\Departments\HOUSTON\Scheduling\Label Files\SELECTED RANGE SFGBLabels - " & DatePart("m", Now()) & " " & DatePart("d", Now()) & " " & DatePart("yyyy", Now()) & ".txt"
+    Set Fileout = fso.CreateTextFile("\\BFS\Departments\HOUSTON\Scheduling\Label Files\SELECTED RANGE SFGBLabels - " & DatePart("m", Now()) & " " & DatePart("d", Now()) & " " & DatePart("yyyy", Now()) & ".txt", True, True)
+    Fileout.Write sLabelData
+    Fileout.Close
+    
+    'Print the label file
+
+End Sub
+Public Function CreateSFGBLabel(QRData As Variant, LineNumber As Variant, QTY As Variant, Width As Variant, Height As Variant, Radius As Variant, Leg As Variant, Series As Variant, Shape As Variant, Handing As Variant, Color As Variant, Lites As Variant, Tint As Variant, Tempered As Variant, Argon As Variant, Comments As Variant) As String
+    Dim sLabel As String
+    
+    sLabel = ""
+    
+'    'Label Start
+    sLabel = "^XA"
+    
+    'QR DATA
+    sLabel = sLabel & vbNewLine & "^FX QR CODE^FO575,10^BQN,2,6^FDQA " & QRData & "^FS"
+    
+    'LINE 1
+    'LINE DATA
+    sLabel = sLabel & vbNewLine & "^FX LINE 1^FX LINE HEADER^FT770,270^ARI,14,10^FDLINE^FS"
+    sLabel = sLabel & vbNewLine & "^FX LINE VALUE^FT770,245^AQI,5,5^FD" & LineNumber & "^FS"
+    
+    'QTY DATA
+    sLabel = sLabel & vbNewLine & "^FX QTY HEADER^FT600,270^ARI,14,10^FDQTY^FS"
+    sLabel = sLabel & vbNewLine & "^FX QTY VALUE^FT600,245^AQI,5,5^FD" & QTY & "^FS"
+    
+    'WIDTH DATA
+    sLabel = sLabel & vbNewLine & "^FX GLASS WIDTH HEADER^FT490,270^ARI,14,10^FDWIDTH^FS"
+    sLabel = sLabel & vbNewLine & "^FX GLASS WIDTH VALUE^FT490,245^AQI,5,5^FD" & Width & "^FS"
+    
+    'HEIGHT DATA
+    sLabel = sLabel & vbNewLine & "^FX GLASS HEIGHT HEADER^FT360,270^ARI,14,10^FDHEIGHT^FS"
+    sLabel = sLabel & vbNewLine & "^FX GLASS HEIGHT VALUE^FT360,245^AQI,5,5^FD" & Height & "^FS"
+    
+    'RADIUS DATA
+    sLabel = sLabel & vbNewLine & "^FX GLASS RADIUS HEADER^FT225,270^ARI,14,10^FDRADIUS^FS"
+    sLabel = sLabel & vbNewLine & "^FX GLASS RADIUS VALUE^FT225,245^AQI,5,5^FD" & Radius & "^FS"
+    
+    'LEG DATA
+    sLabel = sLabel & vbNewLine & "^FX GLASS LEG HEADER^FT90,270^ARI,14,10^FDLEG^FS"
+    sLabel = sLabel & vbNewLine & "^FX GLASS LEG VALUE^FT90,245^AQI,5,5^FD" & Leg & "^FS"
+
+
+    'LINE 2
+    'SERIES DATA
+    sLabel = sLabel & vbNewLine & "^FX SERIES HEADER^FT550,190^ARI,14,10^FDSERIES^FS"
+    sLabel = sLabel & vbNewLine & "^FX SERIES VALUE^FT550,160^AQI,5,5^FD" & Series & "^FS"
+
+    'SHAPE DATA
+    sLabel = sLabel & vbNewLine & "^FX SHAPE HEADER^FT435,190^ARI,14,10^FDSHAPE^FS"
+    sLabel = sLabel & vbNewLine & "^FX SHAPE VALUE^FT435,160^AQI,5,5^FD" & Shape & "^FS"
+    
+    'HANDING DATA
+    sLabel = sLabel & vbNewLine & "^FX HANDING HEADER^FT210,190^ARI,14,10^FDHAND^FS"
+    sLabel = sLabel & vbNewLine & "^FX HANDING VALUE^FT210,160^AQI,5,5^FD" & Handing & "^FS"
+    
+    'COLOR DATA
+    sLabel = sLabel & vbNewLine & "^FX COLOR HEADER^FT100,190^ARI,14,10^FDCOLOR^FS"
+    sLabel = sLabel & vbNewLine & "^FX COLOR VALUE^FT100,160^AQI,5,5^FD" & Color & "^FS"
+
+    
+    'LINE 3
+    'LITES DATA
+    sLabel = sLabel & vbNewLine & "^FX LITES HEADER^FT550,115^ARI,14,10^FDLITES^FS"
+    sLabel = sLabel & vbNewLine & "^FX LITES VALUE^FT550,85^AQI,5,5^FD" & Lites & "^FS"
+    
+    'TINT DATA
+    sLabel = sLabel & vbNewLine & "^FX TINT HEADER^FT435,115^ARI,14,10^FDTINT^FS"
+    sLabel = sLabel & vbNewLine & "^FX TINT VALUE^FT435,85^AQI,5,5^FD" & Tint & "^FS"
+    
+    'TEMPERED DATA
+    sLabel = sLabel & vbNewLine & "^FX TEMP HEADER^FT300,115^ARI,14,10^FDTEMP^FS"
+    sLabel = sLabel & vbNewLine & "^FX TEMP VALUE^FT300,85^AQI,5,5^FD" & Tempered & "^FS"
+    
+    'ARGON DATA
+    sLabel = sLabel & vbNewLine & "^FX ARGON HEADER^FT150,115^ARI,14,10^FDARGON^FS"
+    sLabel = sLabel & vbNewLine & "^FX ARGON VALUE^FT150,85^AQI,5,5^FD" & Argon & "^FS"
+
+    'LINE 4
+    'COMMENTS DATA
+    sLabel = sLabel & vbNewLine & "^FX COMMENTS HEADER^FT550,45^ARI,14,10^FDCOMMENTS^FS"
+    sLabel = sLabel & vbNewLine & "^FX COMMENTS VALUE^FT550,18^AQI,5,5^FD" & Comments & "^FS"
+
+    'Label End
+    sLabel = sLabel & vbNewLine & "^XZ"
+
+    CreateSFGBLabel = sLabel
+    
+End Function
+
+Sub PrintLabels(sFileName As Variant, sPrinerName As Variant)
+    Dim fs1, f1
+    
+    Set fs1 = CreateObject("Scripting.FileSystemObject")
+    fs1.CopyFile sFileName, sPrinerName
+    Set fs1 = Nothing
+End Sub
